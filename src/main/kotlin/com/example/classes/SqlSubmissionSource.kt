@@ -62,7 +62,9 @@ object SqlSubmissionSource: ISubmissionSource {
             Submissions.update({
                 Submissions.id.eq(id)
             }) {
-                it[Submissions.result] = result.toString()
+                it[Submissions.result] = result.status.toString()
+                it[executionTimeSeconds] = result.executionTimeSeconds
+                it[score] = result.score
             }
         }
     }
