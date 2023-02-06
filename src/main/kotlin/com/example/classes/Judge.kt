@@ -6,20 +6,20 @@ import com.example.interfaces.ICompiler
 import com.example.interfaces.IExecutor
 
 class Judge(private val compiler: ICompiler, private val executor: IExecutor) {
-    enum class Status { Accepted, Incorrect, TimeLimitExceeded, CompileError, RuntimeError }
+    enum class Status { Accepted, WrongAnswer, TimeLimitExceeded, CompileError, RuntimeError }
 
-    data class Result (val status: Status, val executionTimeSeconds: Double, val score: Double)
+    data class Verdict (val status: Status, val executionTimeSeconds: Double, val score: Double)
 
-    fun judge(submission: SubmissionData): Result {
+    fun judge(submission: SubmissionData): Verdict {
         val executableFilePath: String?
 
         try {
             executableFilePath = compiler.compile(submission.code)
         } catch (e:Exception) {
-            return Result(Status.CompileError, -1.0, 0.0)
+            return Verdict(Status.CompileError, -1.0, 0.0)
         }
 
-        if (!File(executableFilePath).exists()) return Result(Status.CompileError, -1.0, 0.0)
+        if (!File(executableFilePath).exists()) return Verdict(Status.CompileError, -1.0, 0.0)
 
         val result = executeAndDetect(executableFilePath, submission.testCases)
 
@@ -28,7 +28,7 @@ class Judge(private val compiler: ICompiler, private val executor: IExecutor) {
         return result
     }
 
-    private fun executeAndDetect(executableFilePath: String, testCases: List<TestCaseData>): Result {
+    private fun executeAndDetect(executableFilePath: String, testCases: List<TestCaseData>): Verdict {
         var isCorrect = true
         var totalScore = 0.0
         var totalExecutionTimeSeconds = 0.0
@@ -39,13 +39,13 @@ class Judge(private val compiler: ICompiler, private val executor: IExecutor) {
             try {
                 executionResult = executor.execute(executableFilePath, testCase.input, testCase.timeOutSeconds)
             } catch (e:Exception) {
-                return Result(Status.RuntimeError, -1.0, 0.0)
+                return Verdict(Status.RuntimeError, -1.0, 0.0)
             }
 
             when {
-                executionResult == null -> return Result(Status.RuntimeError, -1.0, 0.0)
-                executionResult.isTimeOut -> return Result(Status.TimeLimitExceeded, -1.0, 0.0)
-                executionResult.isCorrupted -> return Result(Status.RuntimeError, -1.0, 0.0)
+                executionResult == null -> return Verdict(Status.RuntimeError, -1.0, 0.0)
+                executionResult.isTimeOut -> return Verdict(Status.TimeLimitExceeded, -1.0, 0.0)
+                executionResult.isCorrupted -> return Verdict(Status.RuntimeError, -1.0, 0.0)
             }
 
             val output = executionResult.output.trim()
@@ -59,7 +59,7 @@ class Judge(private val compiler: ICompiler, private val executor: IExecutor) {
             }
         }
 
-        return if (isCorrect) Result(Status.Accepted, totalExecutionTimeSeconds, totalScore)
-            else Result(Status.Incorrect, totalExecutionTimeSeconds, totalScore)
+        return if (isCorrect) Verdict(Status.Accepted, totalExecutionTimeSeconds, totalScore)
+            else Verdict(Status.WrongAnswer, totalExecutionTimeSeconds, totalScore)
     }
 }

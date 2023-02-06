@@ -5,5 +5,5 @@ import com.example.classes.SubmissionData
 
 interface ISubmissionSource {
     fun getNextSubmissionData(): SubmissionData?
-    fun setResult(id: Int, result: Judge.Result)
+    fun setResult(id: Int, verdict: Judge.Verdict)
 }

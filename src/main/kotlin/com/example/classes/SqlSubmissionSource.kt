@@ -57,14 +57,14 @@ object SqlSubmissionSource: ISubmissionSource {
         return submissionData
     }
 
-    override fun setResult(id: Int, result: Judge.Result) {
+    override fun setResult(id: Int, verdict: Judge.Verdict) {
         transaction {
             Submissions.update({
                 Submissions.id.eq(id)
             }) {
-                it[Submissions.result] = result.status.toString()
-                it[executionTimeSeconds] = result.executionTimeSeconds
-                it[score] = result.score
+                it[result] = verdict.status.toString()
+                it[executionTimeSeconds] = verdict.executionTimeSeconds
+                it[score] = verdict.score
             }
         }
     }
