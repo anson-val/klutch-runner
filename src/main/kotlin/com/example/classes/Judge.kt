@@ -16,6 +16,7 @@ class Judge(private val compiler: ICompiler, private val executor: IExecutor) {
         try {
             executableFilePath = compiler.compile(submission.code)
         } catch (e:Exception) {
+            println(e)
             return Verdict(Status.CompileError, -1.0, 0.0)
         }
 
@@ -48,7 +49,7 @@ class Judge(private val compiler: ICompiler, private val executor: IExecutor) {
                 executionResult.isCorrupted -> return Verdict(Status.RuntimeError, -1.0, 0.0)
             }
 
-            val output = executionResult.output.trim()
+            val output = executionResult.output?.trim() ?: return Verdict(Status.RuntimeError, -1.0, 0.0)
             val expectedOutput = testCase.expectedOutput.trim()
             totalExecutionTimeSeconds += executionResult.executionTimeSeconds
 

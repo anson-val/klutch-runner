@@ -1,28 +1,43 @@
 package com.example.classes.executors
 
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.util.concurrent.TimeUnit
 
 import com.example.classes.overwriteFile
+import com.example.classes.appendPath
+import com.example.classes.appendPathUnix
 import com.example.interfaces.IExecutor
 
-const val JVM_INPUT_PATH = "input.txt"
-const val JVM_OUTPUT_PATH = "output.txt"
+const val JVM_INPUT_FILENAME = "input.txt"
+const val JVM_OUTPUT_FILENAME = "output.txt"
+const val DOCKER_CONTAINER_NAME = "jvm-docker"
 
-class JVMExecutor: IExecutor {
+class JVMExecutor(private val dockerWorkspace: String): IExecutor {
+    init {
+        Files.createDirectories(Paths.get(dockerWorkspace))
+    }
+
     override fun execute(executableFileName: String, input: String, timeOutLimitInSeconds: Double): IExecutor.ExecutionResult {
-        val inputFile = input.overwriteFile(JVM_INPUT_PATH)
-        val outputFile = File(JVM_OUTPUT_PATH)
-        val jvmExecuteCommand = listOf("java", "-jar", executableFileName)
+        val inputFilePath = dockerWorkspace.appendPathUnix(JVM_INPUT_FILENAME)
+        val outputFilePath = dockerWorkspace.appendPathUnix(JVM_OUTPUT_FILENAME)
+        val workspacePath = "${System.getProperty("user.dir").appendPath(dockerWorkspace)}:/$dockerWorkspace"
+
+        val inputFile = input.overwriteFile(inputFilePath)
+        val jvmExecuteCommand = listOf("docker", "run", "--rm", "--name", DOCKER_CONTAINER_NAME, "-v", workspacePath, "zenika/kotlin",
+            "sh", "-c", "java -jar $executableFileName < /$inputFilePath > /$outputFilePath")
 
         val executeProcess = ProcessBuilder(jvmExecuteCommand)
-
-        executeProcess.redirectInput(inputFile)
-        executeProcess.redirectOutput(outputFile)
+        executeProcess.redirectError(ProcessBuilder.Redirect.INHERIT)
 
         val process = executeProcess.start()
         val startTimeMillis = System.currentTimeMillis().toDouble()
         val isTimeOut = !process.waitFor((timeOutLimitInSeconds * 1000).toLong(), TimeUnit.MILLISECONDS)
+
+        if (isTimeOut) {
+            ProcessBuilder("docker", "kill", DOCKER_CONTAINER_NAME).start().waitFor()
+        }
 
         process.destroy()
         process.waitFor()
@@ -31,7 +46,13 @@ class JVMExecutor: IExecutor {
 
         val isCorrupted = process.exitValue() != 0
 
-        val output = outputFile.readText()
+        val outputFile = File(outputFilePath)
+        var output: String? = null
+
+        if (outputFile.exists()) {
+            output = outputFile.readText()
+        }
+
         inputFile.delete()
         outputFile.delete()
 
