@@ -8,11 +8,11 @@ import java.util.concurrent.TimeUnit
 import com.example.classes.overwriteFile
 import com.example.classes.appendPath
 import com.example.classes.appendPathUnix
+import com.example.classes.RandomStringGenerator
 import com.example.interfaces.IExecutor
 
 const val JVM_INPUT_FILENAME = "input.txt"
 const val JVM_OUTPUT_FILENAME = "output.txt"
-const val DOCKER_CONTAINER_NAME = "jvm-docker"
 
 class JVMExecutor(private val dockerWorkspace: String): IExecutor {
     init {
@@ -20,12 +20,13 @@ class JVMExecutor(private val dockerWorkspace: String): IExecutor {
     }
 
     override fun execute(executableFileName: String, input: String, timeOutLimitInSeconds: Double): IExecutor.ExecutionResult {
+        val dockerContainerName = "klutch-jvm-executor-${RandomStringGenerator.generate(24)}"
         val inputFilePath = dockerWorkspace.appendPathUnix(JVM_INPUT_FILENAME)
         val outputFilePath = dockerWorkspace.appendPathUnix(JVM_OUTPUT_FILENAME)
         val workspacePath = "${System.getProperty("user.dir").appendPath(dockerWorkspace)}:/$dockerWorkspace"
 
         val inputFile = input.overwriteFile(inputFilePath)
-        val jvmExecuteCommand = listOf("docker", "run", "--rm", "--name", DOCKER_CONTAINER_NAME, "-v", workspacePath, "zenika/kotlin",
+        val jvmExecuteCommand = listOf("docker", "run", "--rm", "--name", dockerContainerName, "-v", workspacePath, "zenika/kotlin",
             "sh", "-c", "java -jar $executableFileName < /$inputFilePath > /$outputFilePath")
 
         val executeProcess = ProcessBuilder(jvmExecuteCommand)
@@ -36,7 +37,7 @@ class JVMExecutor(private val dockerWorkspace: String): IExecutor {
         val isTimeOut = !process.waitFor((timeOutLimitInSeconds * 1000).toLong(), TimeUnit.MILLISECONDS)
 
         if (isTimeOut) {
-            ProcessBuilder("docker", "kill", DOCKER_CONTAINER_NAME).start().waitFor()
+            ProcessBuilder("docker", "kill", dockerContainerName).start().waitFor()
         }
 
         process.destroy()
