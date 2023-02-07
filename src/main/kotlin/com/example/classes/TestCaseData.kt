@@ -1,5 +1,8 @@
 package com.example.classes
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class TestCaseData(
     val input: String,
     val expectedOutput: String,
