@@ -1,4 +1,5 @@
 val exposedVersion: String by project
+val jedisVersion: String by project
 
 plugins {
     kotlin("jvm") version "1.8.0"
@@ -24,6 +25,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+    implementation("redis.clients:jedis:$jedisVersion")
     implementation("org.postgresql:postgresql:42.5.2")
     implementation("com.zaxxer:HikariCP:5.0.1")
     implementation("org.slf4j:slf4j-api:2.0.6")
