@@ -3,7 +3,7 @@ package com.example.model
 import org.jetbrains.exposed.sql.Table
 
 
-object TestCases: Table() {
+object TestCases : Table() {
     val id = integer("TestCaseId").autoIncrement()
     val input = text("TestInput")
     val expectedOutput = text("ExpectedOutput")

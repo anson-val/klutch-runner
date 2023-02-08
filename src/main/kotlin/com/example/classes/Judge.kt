@@ -1,21 +1,20 @@
 package com.example.classes
 
-import java.io.File
-
 import com.example.interfaces.ICompiler
 import com.example.interfaces.IExecutor
+import java.io.File
 
 class Judge(private val compiler: ICompiler, private val executor: IExecutor) {
     enum class Status { Accepted, WrongAnswer, TimeLimitExceeded, CompileError, RuntimeError }
 
-    data class Verdict (val status: Status, val executionTimeSeconds: Double, val score: Double)
+    data class Verdict(val status: Status, val executionTimeSeconds: Double, val score: Double)
 
     fun judge(submission: SubmissionData): Verdict {
         val executableFilePath: String?
 
         try {
             executableFilePath = compiler.compile(submission.code)
-        } catch (e:Exception) {
+        } catch (e: Exception) {
             println(e)
             return Verdict(Status.CompileError, -1.0, 0.0)
         }
@@ -39,7 +38,7 @@ class Judge(private val compiler: ICompiler, private val executor: IExecutor) {
 
             try {
                 executionResult = executor.execute(executableFilePath, testCase.input, testCase.timeOutSeconds)
-            } catch (e:Exception) {
+            } catch (e: Exception) {
                 return Verdict(Status.RuntimeError, -1.0, 0.0)
             }
 
@@ -61,6 +60,6 @@ class Judge(private val compiler: ICompiler, private val executor: IExecutor) {
         }
 
         return if (isCorrect) Verdict(Status.Accepted, totalExecutionTimeSeconds, totalScore)
-            else Verdict(Status.WrongAnswer, totalExecutionTimeSeconds, totalScore)
+        else Verdict(Status.WrongAnswer, totalExecutionTimeSeconds, totalScore)
     }
 }

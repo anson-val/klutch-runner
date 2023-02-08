@@ -7,5 +7,6 @@ interface IExecutor {
         val output: String?,
         val executionTimeSeconds: Double
     )
+
     fun execute(executableFileName: String, input: String, timeOutLimitInSeconds: Double): ExecutionResult
 }

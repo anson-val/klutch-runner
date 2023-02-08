@@ -1,27 +1,37 @@
 package com.example.classes
 
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.decodeFromString
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.update
-import org.jetbrains.exposed.sql.transactions.transaction
-import com.zaxxer.hikari.HikariConfig
-import com.zaxxer.hikari.HikariDataSource
-
 import com.example.interfaces.ISubmissionSource
 import com.example.model.Problems
 import com.example.model.Submissions
 import com.example.model.TestCases
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 
-object SqlSubmissionSource: ISubmissionSource {
-    private val supportedLanguage = listOf("kotlin", "c", "java", "python")
+object SqlSubmissionSource : ISubmissionSource {
+    private val supportedLanguage = ConfigLoader.config.runner.supportedLanguages
 
     init {
-        val config = HikariConfig("/hikari.properties")
-        config.schema = "public"
-        val dataSource = HikariDataSource(config)
-        Database.connect(dataSource)
+        val sqlDriver =
+            when (ConfigLoader.config.sqlDatabase.type) {
+                "postgresql" -> "org.postgresql.Driver"
+                "mysql" -> "com.mysql.cj.jdbc.Driver"
+                "oracle" -> "oracle.jdbc.OracleDriver"
+                "sqlite" -> "org.sqlite.JDBC"
+                "h2" -> "org.h2.Driver"
+                "sqlserver" -> "com.microsoft.sqlserver.jdbc.SQLServerDriver"
+                else -> throw Exception()
+            }
+
+        Database.connect(
+            ConfigLoader.config.sqlDatabase.host,
+            driver = sqlDriver,
+            user = ConfigLoader.config.sqlDatabase.user,
+            password = ConfigLoader.config.sqlDatabase.pwd
+        )
 
         transaction {
             SchemaUtils.create(Problems, TestCases, Submissions)
@@ -39,7 +49,7 @@ object SqlSubmissionSource: ISubmissionSource {
                 val submissionData = RedisConnector.db!!.lpop(language)
                 return Json.decodeFromString<SubmissionData>(submissionData)
             }
-        } catch(e: Exception) {
+        } catch (e: Exception) {
             RedisConnector.db?.disconnect()
             RedisConnector.db = null
             println(e)
