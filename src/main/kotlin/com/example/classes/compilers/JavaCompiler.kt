@@ -27,7 +27,7 @@ class JavaCompiler(private val dockerWorkspace: String): ICompiler {
         val codeFile = code.overwriteFile(codePath)
         val manifestFile = "Main-Class: Main\n\n\n".overwriteFile(manifestFilePath)
 
-        val javaCompileCommand = listOf("docker", "run", "--rm", "-v", workspacePath, "zenika/kotlin", "sh", "-c",
+        val javaCompileCommand = listOf("docker", "run", "--rm", "-v", workspacePath, "eclipse-temurin:latest", "sh", "-c",
             "cd /$dockerWorkspace; javac $JAVA_CODE_FILENAME; jar -cvfm $JAVA_EXECUTABLE_FILENAME $JAVA_MANIFEST_FILENAME $JAVA_CLASS_FILENAME")
 
         val compileProcess = ProcessBuilder(javaCompileCommand)

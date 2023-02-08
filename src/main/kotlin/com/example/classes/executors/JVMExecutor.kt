@@ -26,7 +26,7 @@ class JVMExecutor(private val dockerWorkspace: String): IExecutor {
         val workspacePath = "${System.getProperty("user.dir").appendPath(dockerWorkspace)}:/$dockerWorkspace"
 
         val inputFile = input.overwriteFile(inputFilePath)
-        val jvmExecuteCommand = listOf("docker", "run", "--rm", "--name", dockerContainerName, "-v", workspacePath, "zenika/kotlin",
+        val jvmExecuteCommand = listOf("docker", "run", "--rm", "--name", dockerContainerName, "-v", workspacePath, "eclipse-temurin:latest",
             "sh", "-c", "java -jar $executableFileName < /$inputFilePath > /$outputFilePath")
 
         val executeProcess = ProcessBuilder(jvmExecuteCommand)

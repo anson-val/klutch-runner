@@ -21,8 +21,8 @@ class KotlinCompiler(private val dockerWorkspace: String): ICompiler {
         val executablePath = dockerWorkspace.appendPathUnix(KOTLIN_EXECUTABLE_FILENAME)
         val workspacePath = "${System.getProperty("user.dir").appendPath(dockerWorkspace)}:/$dockerWorkspace"
         val codeFile = code.overwriteFile(codePath)
-        val kotlinCompileCommand = listOf("docker", "run", "--rm", "-v", workspacePath, "zenika/kotlin",
-            "kotlinc", "/$codePath", "-include-runtime", "-d", "/$executablePath")
+        val kotlinCompileCommand = listOf("docker", "run", "--rm", "-v", workspacePath, "danysk/kotlin:latest",
+            "sh", "-c", "kotlinc /$codePath -include-runtime -d /$executablePath")
 
         val compileProcess = ProcessBuilder(kotlinCompileCommand)
         compileProcess.redirectError(ProcessBuilder.Redirect.INHERIT)
