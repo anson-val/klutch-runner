@@ -14,9 +14,9 @@ import com.example.model.Problems
 import com.example.model.Submissions
 import com.example.model.TestCases
 
-const val SUPPORTED_LANGUAGE = "kotlin"
-
 object SqlSubmissionSource: ISubmissionSource {
+    private val supportedLanguage = listOf("kotlin", "c")
+
     init {
         val config = HikariConfig("/hikari.properties")
         config.schema = "public"
@@ -33,15 +33,20 @@ object SqlSubmissionSource: ISubmissionSource {
             RedisConnector.tryConnection()
             if (RedisConnector.db == null) return null
 
-            if (!RedisConnector.db!!.exists(SUPPORTED_LANGUAGE)) return null
-            val submissionData = RedisConnector.db!!.lpop(SUPPORTED_LANGUAGE)
-            return Json.decodeFromString<SubmissionData>(submissionData)
+            for (language in supportedLanguage) {
+                if (!RedisConnector.db!!.exists(language)) continue
+
+                val submissionData = RedisConnector.db!!.lpop(language)
+                return Json.decodeFromString<SubmissionData>(submissionData)
+            }
         } catch(e: Exception) {
             RedisConnector.db?.disconnect()
             RedisConnector.db = null
             println(e)
             return null
         }
+
+        return null
     }
 
     override fun setResult(id: Int, verdict: Judge.Verdict) {
