@@ -1,33 +1,38 @@
 package com.example.classes.executors
 
+import com.example.classes.RandomStringGenerator
+import com.example.classes.appendPath
+import com.example.classes.appendPathUnix
+import com.example.classes.overwriteFile
+import com.example.interfaces.IExecutor
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.concurrent.TimeUnit
 
-import com.example.classes.overwriteFile
-import com.example.classes.appendPath
-import com.example.classes.appendPathUnix
-import com.example.classes.RandomStringGenerator
-import com.example.interfaces.IExecutor
-
 const val JVM_INPUT_FILENAME = "input.txt"
 const val JVM_OUTPUT_FILENAME = "output.txt"
 
-class JVMExecutor(private val dockerWorkspace: String): IExecutor {
+class JVMExecutor(private val dockerWorkspace: String) : IExecutor {
     init {
         Files.createDirectories(Paths.get(dockerWorkspace))
     }
 
-    override fun execute(executableFileName: String, input: String, timeOutLimitInSeconds: Double): IExecutor.ExecutionResult {
+    override fun execute(
+        executableFileName: String,
+        input: String,
+        timeOutLimitInSeconds: Double
+    ): IExecutor.ExecutionResult {
         val dockerContainerName = "klutch-jvm-executor-${RandomStringGenerator.generate(24)}"
         val inputFilePath = dockerWorkspace.appendPathUnix(JVM_INPUT_FILENAME)
         val outputFilePath = dockerWorkspace.appendPathUnix(JVM_OUTPUT_FILENAME)
         val workspacePath = "${System.getProperty("user.dir").appendPath(dockerWorkspace)}:/$dockerWorkspace"
 
         val inputFile = input.overwriteFile(inputFilePath)
-        val jvmExecuteCommand = listOf("docker", "run", "--rm", "--name", dockerContainerName, "-v", workspacePath, "eclipse-temurin:latest",
-            "sh", "-c", "java -jar $executableFileName < /$inputFilePath > /$outputFilePath")
+        val jvmExecuteCommand = listOf(
+            "docker", "run", "--rm", "--name", dockerContainerName, "-v", workspacePath, "eclipse-temurin:latest",
+            "sh", "-c", "java -jar $executableFileName < /$inputFilePath > /$outputFilePath"
+        )
 
         val executeProcess = ProcessBuilder(jvmExecuteCommand)
         executeProcess.redirectError(ProcessBuilder.Redirect.INHERIT)

@@ -5,8 +5,5 @@ import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.addResourceSource
 
 object ConfigLoader {
-    val config = ConfigLoaderBuilder.default()
-        .addResourceSource("/config.json")
-        .build()
-        .loadConfigOrThrow<Config>()
+    val config = ConfigLoaderBuilder.default().addResourceSource("/config.json").build().loadConfigOrThrow<Config>()
 }

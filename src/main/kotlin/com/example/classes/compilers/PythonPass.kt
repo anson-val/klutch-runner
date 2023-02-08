@@ -1,15 +1,14 @@
 package com.example.classes.compilers
 
+import com.example.classes.appendPathUnix
+import com.example.classes.overwriteFile
+import com.example.interfaces.ICompiler
 import java.nio.file.Files
 import java.nio.file.Paths
 
-import com.example.classes.overwriteFile
-import com.example.classes.appendPathUnix
-import com.example.interfaces.ICompiler
-
 const val PYTHON_CODE_FILENAME = "_code.py"
 
-class PythonPass(private val dockerWorkspace: String): ICompiler {
+class PythonPass(private val dockerWorkspace: String) : ICompiler {
     init {
         Files.createDirectories(Paths.get(dockerWorkspace))
     }

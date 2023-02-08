@@ -13,20 +13,26 @@ import java.util.concurrent.TimeUnit
 const val GCC_INPUT_FILENAME = "input.txt"
 const val GCC_OUTPUT_FILENAME = "output.txt"
 
-class GCCExecutor(private val dockerWorkspace: String): IExecutor {
+class GCCExecutor(private val dockerWorkspace: String) : IExecutor {
     init {
         Files.createDirectories(Paths.get(dockerWorkspace))
     }
 
-    override fun execute(executableFileName: String, input: String, timeOutLimitInSeconds: Double): IExecutor.ExecutionResult {
+    override fun execute(
+        executableFileName: String,
+        input: String,
+        timeOutLimitInSeconds: Double
+    ): IExecutor.ExecutionResult {
         val dockerContainerName = "klutch-gcc-executor-${RandomStringGenerator.generate(24)}"
         val inputFilePath = dockerWorkspace.appendPathUnix(GCC_INPUT_FILENAME)
         val outputFilePath = dockerWorkspace.appendPathUnix(GCC_OUTPUT_FILENAME)
         val workspacePath = "${System.getProperty("user.dir").appendPath(dockerWorkspace)}:/$dockerWorkspace"
 
         val inputFile = input.overwriteFile(inputFilePath)
-        val gccExecuteCommand = listOf("docker", "run", "--rm", "--name", dockerContainerName, "-v", workspacePath, "gcc",
-            "sh", "-c", "$executableFileName < /$inputFilePath > /$outputFilePath")
+        val gccExecuteCommand = listOf(
+            "docker", "run", "--rm", "--name", dockerContainerName, "-v", workspacePath, "gcc",
+            "sh", "-c", "$executableFileName < /$inputFilePath > /$outputFilePath"
+        )
 
         val executeProcess = ProcessBuilder(gccExecuteCommand)
         executeProcess.redirectError(ProcessBuilder.Redirect.INHERIT)

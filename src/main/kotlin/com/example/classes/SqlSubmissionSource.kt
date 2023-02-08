@@ -1,23 +1,22 @@
 package com.example.classes
 
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.decodeFromString
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.update
-import org.jetbrains.exposed.sql.transactions.transaction
-
 import com.example.interfaces.ISubmissionSource
 import com.example.model.Problems
 import com.example.model.Submissions
 import com.example.model.TestCases
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 
-object SqlSubmissionSource: ISubmissionSource {
+object SqlSubmissionSource : ISubmissionSource {
     private val supportedLanguage = ConfigLoader.config.runner.supportedLanguages
 
     init {
         val sqlDriver =
-            when(ConfigLoader.config.sqlDatabase.type) {
+            when (ConfigLoader.config.sqlDatabase.type) {
                 "postgresql" -> "org.postgresql.Driver"
                 "mysql" -> "com.mysql.cj.jdbc.Driver"
                 "oracle" -> "oracle.jdbc.OracleDriver"
@@ -27,10 +26,12 @@ object SqlSubmissionSource: ISubmissionSource {
                 else -> throw Exception()
             }
 
-        Database.connect(ConfigLoader.config.sqlDatabase.host,
+        Database.connect(
+            ConfigLoader.config.sqlDatabase.host,
             driver = sqlDriver,
             user = ConfigLoader.config.sqlDatabase.user,
-            password = ConfigLoader.config.sqlDatabase.pwd)
+            password = ConfigLoader.config.sqlDatabase.pwd
+        )
 
         transaction {
             SchemaUtils.create(Problems, TestCases, Submissions)
@@ -48,7 +49,7 @@ object SqlSubmissionSource: ISubmissionSource {
                 val submissionData = RedisConnector.db!!.lpop(language)
                 return Json.decodeFromString<SubmissionData>(submissionData)
             }
-        } catch(e: Exception) {
+        } catch (e: Exception) {
             RedisConnector.db?.disconnect()
             RedisConnector.db = null
             println(e)
