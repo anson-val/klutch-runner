@@ -1,6 +1,7 @@
 val exposedVersion: String by project
 val jedisVersion: String by project
 val kotlinxSerializationVersion: String by project
+val hopliteVersion: String by project
 
 plugins {
     kotlin("jvm") version "1.8.10"
@@ -32,6 +33,8 @@ dependencies {
     implementation("org.postgresql:postgresql:42.5.2")
     implementation("com.zaxxer:HikariCP:5.0.1")
     implementation("org.slf4j:slf4j-api:2.0.6")
+    implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")
+    implementation("com.sksamuel.hoplite:hoplite-json:$hopliteVersion")
     testImplementation(kotlin("test"))
 }
 
