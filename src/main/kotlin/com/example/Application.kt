@@ -3,6 +3,7 @@ package com.example
 import com.example.classes.Judge
 import com.example.classes.SqlSubmissionSource
 import com.example.classes.compilers.GCCCompiler
+import com.example.classes.compilers.JavaCompiler
 import com.example.classes.compilers.KotlinCompiler
 import com.example.classes.executors.GCCExecutor
 import com.example.classes.executors.JVMExecutor
@@ -29,6 +30,7 @@ fun main() {
 fun getJudge(language: String): Judge =
     when(language) {
         "kotlin" -> Judge(KotlinCompiler(DOCKER_WORKSPACE), JVMExecutor(DOCKER_WORKSPACE))
+        "java" -> Judge(JavaCompiler(DOCKER_WORKSPACE), JVMExecutor(DOCKER_WORKSPACE))
         "c" -> Judge(GCCCompiler(DOCKER_WORKSPACE), GCCExecutor(DOCKER_WORKSPACE))
         else -> throw NotImplementedError()
     }

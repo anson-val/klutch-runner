@@ -15,7 +15,7 @@ import com.example.model.Submissions
 import com.example.model.TestCases
 
 object SqlSubmissionSource: ISubmissionSource {
-    private val supportedLanguage = listOf("kotlin", "c")
+    private val supportedLanguage = listOf("kotlin", "c", "java")
 
     init {
         val config = HikariConfig("/hikari.properties")
