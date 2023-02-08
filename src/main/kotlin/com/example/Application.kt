@@ -2,11 +2,8 @@ package com.example
 
 import com.example.classes.Judge
 import com.example.classes.SqlSubmissionSource
-import com.example.classes.compilers.GCCCompiler
-import com.example.classes.compilers.JavaCompiler
-import com.example.classes.compilers.KotlinCompiler
-import com.example.classes.executors.GCCExecutor
-import com.example.classes.executors.JVMExecutor
+import com.example.classes.compilers.*
+import com.example.classes.executors.*
 import com.example.interfaces.ISubmissionSource
 
 const val DOCKER_WORKSPACE = "klutch-docker-runner"
@@ -32,5 +29,6 @@ fun getJudge(language: String): Judge =
         "kotlin" -> Judge(KotlinCompiler(DOCKER_WORKSPACE), JVMExecutor(DOCKER_WORKSPACE))
         "java" -> Judge(JavaCompiler(DOCKER_WORKSPACE), JVMExecutor(DOCKER_WORKSPACE))
         "c" -> Judge(GCCCompiler(DOCKER_WORKSPACE), GCCExecutor(DOCKER_WORKSPACE))
+        "python" -> Judge(PythonPass(DOCKER_WORKSPACE), PythonExecutor(DOCKER_WORKSPACE))
         else -> throw NotImplementedError()
     }
