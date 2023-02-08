@@ -1,8 +1,6 @@
 package com.example.classes.config
 
-data class GCCConfig(
-    val codeFilename: String,
-    val executableFilename: String,
+data class JVMConfig(
     val inputFilename: String,
     val outputFilename: String,
 )
